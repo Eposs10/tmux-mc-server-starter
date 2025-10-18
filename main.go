@@ -60,6 +60,17 @@ func main() {
 		}
 	}
 
+	check := exec.Command("tmux", "has-session", "-t", config.name)
+	if err := check.Run(); err == nil {
+		fmt.Printf("⚠️ Session '%s' already exists — attaching instead.\n", config.name)
+		err := exec.Command("tmux", "attach", "-t", config.name).Run()
+		if err != nil {
+			fmt.Println("❌ Error attaching to tmux session:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	// --- Build the script to run inside tmux ---
 	script := fmt.Sprintf(`
 cd "%s"
@@ -85,7 +96,7 @@ done
 `, config.path, config.jar, config.maxRAM, config.minRAM, config.waitTime)
 
 	// --- Run tmux new-session ---
-	cmd := exec.Command("tmux", "new", "-d", "-s", config.name, "bash")
+	cmd := exec.Command("tmux", "new", "-d", "-s", config.name, "bash", "-s")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -133,11 +144,14 @@ done
 }
 
 func printHelp(exitCode int) {
-	fmt.Printf("Usage: %s <session_name> <path> [options]\n", os.Args[0])
+	fmt.Println("Usage:")
+	fmt.Println("  <session_name> <path> [options]")
+	fmt.Println()
 	fmt.Println("Options:")
-	fmt.Println("  --jar string	   JAR file name to run (default \"server.jar\")")
-	fmt.Println("  --min-ram string   Minimum RAM allocation (default \"2G\")")
-	fmt.Println("  --max-ram string   Maximum RAM allocation (default \"6G\")")
-	fmt.Println("  --wait-time int	Seconds to wait before restart (default 5)")
+	fmt.Println("  --jar string       JAR file name (default: server.jar)")
+	fmt.Println("  --min-ram string   Minimum RAM (default: 2G)")
+	fmt.Println("  --max-ram string   Maximum RAM (default: 6G)")
+	fmt.Println("  --wait-time int    Seconds to wait before restart (default: 5)")
+
 	os.Exit(exitCode)
 }
