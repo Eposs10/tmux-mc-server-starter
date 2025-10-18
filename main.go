@@ -23,7 +23,7 @@ func main() {
 		printHelp(0)
 	}
 
-	if len(os.Args) <= 3 {
+	if len(os.Args) < 3 {
 		printHelp(1)
 	}
 
