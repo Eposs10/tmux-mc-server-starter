@@ -110,9 +110,9 @@ done
 
 func attachToSession(name string) {
 	attachCmd := exec.Command("tmux", "attach", "-t", name)
-	//attachCmd.Stdin = os.Stdin
-	//attachCmd.Stdout = os.Stdout
-	//attachCmd.Stderr = os.Stderr
+	attachCmd.Stdin = os.Stdin
+	attachCmd.Stdout = os.Stdout
+	attachCmd.Stderr = os.Stderr
 
 	if err := attachCmd.Run(); err != nil {
 		fmt.Println("❌ Failed to attach to tmux session:", err)
