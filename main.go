@@ -101,8 +101,15 @@ done
 	}
 
 	// Write the script to tmux's stdin
-	_, _ = stdin.Write([]byte(script))
-	stdin.Close()
+	if _, err := stdin.Write([]byte(script)); err != nil {
+		fmt.Println("❌ Failed to write script to tmux stdin:", err)
+		os.Exit(1)
+	}
+
+	if err := stdin.Close(); err != nil {
+		fmt.Println("❌ Error closing tmux stdin:", err)
+		os.Exit(1)
+	}
 
 	if err := cmd.Wait(); err != nil {
 		fmt.Println("❌ Error waiting for tmux:", err)
