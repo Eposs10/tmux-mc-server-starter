@@ -86,7 +86,6 @@ done
 
 	// --- Run tmux new-session ---
 	cmd := exec.Command("tmux", "new", "-d", "-s", config.name, "bash")
-	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
