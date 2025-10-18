@@ -68,59 +68,36 @@ func main() {
 		return
 	}
 
-	// --- Build the script to run inside tmux ---
-	script := fmt.Sprintf(`
-cd "%s"
-
-JAR="%s"
-MAXRAM="%s"
-MINRAM="%s"
-TIME=%d
-
+	cmd := exec.Command(
+		"tmux", "new", "-d",
+		"-s", config.name,
+		"-c", config.path, // <— this fixes it
+		"bash", "-c", fmt.Sprintf(
+			`
 while true; do
-    java -Xmx$MAXRAM -Xms$MINRAM -jar $JAR nogui
+    java -Xmx%s -Xms%s -jar %s nogui
     mkdir -p "exit_codes"
     touch "exit_codes/server_exit_codes.log"
     echo "[$(date +"%%d.%%m.%%Y %%T")] ExitCode: $?" >> exit_codes/server_exit_codes.log
-    echo "----- Press enter to prevent the server from restarting in $TIME seconds -----"
-    read -t $TIME input
+    echo "----- Press enter to prevent the server from restarting in %d seconds -----"
+    read -t %d input
     if [ $? == 0 ]; then
         break
     else
         echo "------------------- SERVER RESTARTS -------------------"
     fi
 done
-`, config.path, config.jar, config.maxRAM, config.minRAM, config.waitTime)
+`,
+			config.maxRAM,
+			config.minRAM,
+			config.jar,
+			config.waitTime,
+			config.waitTime,
+		),
+	)
 
-	// --- Run tmux new-session ---
-	cmd := exec.Command("tmux", "new", "-d", "-s", config.name, "bash", "-s")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		fmt.Println("❌ Failed to get stdin pipe:", err)
-		os.Exit(1)
-	}
-
-	if err := cmd.Start(); err != nil {
+	if err := cmd.Run(); err != nil {
 		fmt.Println("❌ Failed to start tmux session:", err)
-		os.Exit(1)
-	}
-
-	// Write the script to tmux's stdin
-	if _, err := stdin.Write([]byte(script)); err != nil {
-		fmt.Println("❌ Failed to write script to tmux stdin:", err)
-		os.Exit(1)
-	}
-
-	if err := stdin.Close(); err != nil {
-		fmt.Println("❌ Error closing tmux stdin:", err)
-		os.Exit(1)
-	}
-
-	if err := cmd.Wait(); err != nil {
-		fmt.Println("❌ Error waiting for tmux:", err)
 		os.Exit(1)
 	}
 
@@ -133,9 +110,9 @@ done
 
 func attachToSession(name string) {
 	attachCmd := exec.Command("tmux", "attach", "-t", name)
-	attachCmd.Stdin = os.Stdin
-	attachCmd.Stdout = os.Stdout
-	attachCmd.Stderr = os.Stderr
+	//attachCmd.Stdin = os.Stdin
+	//attachCmd.Stdout = os.Stdout
+	//attachCmd.Stderr = os.Stderr
 
 	if err := attachCmd.Run(); err != nil {
 		fmt.Println("❌ Failed to attach to tmux session:", err)
