@@ -63,11 +63,8 @@ func main() {
 	check := exec.Command("tmux", "has-session", "-t", config.name)
 	if err := check.Run(); err == nil {
 		fmt.Printf("⚠️ Session '%s' already exists — attaching instead.\n", config.name)
-		err := exec.Command("tmux", "attach", "-t", config.name).Run()
-		if err != nil {
-			fmt.Println("❌ Error attaching to tmux session:", err)
-			os.Exit(1)
-		}
+		time.Sleep(500 * time.Millisecond)
+		attachToSession(config.name)
 		return
 	}
 
@@ -129,10 +126,13 @@ done
 
 	fmt.Printf("✅ Tmux session '%s' started in '%s'.\n", config.name, config.path)
 	fmt.Println("Attaching now... (detach with Ctrl+B, then D)")
-	time.Sleep(1 * time.Second)
+	time.Sleep(500 * time.Millisecond)
 
-	// --- Attach to tmux session ---
-	attachCmd := exec.Command("tmux", "attach", "-t", config.name)
+	attachToSession(config.name)
+}
+
+func attachToSession(name string) {
+	attachCmd := exec.Command("tmux", "attach", "-t", name)
 	attachCmd.Stdin = os.Stdin
 	attachCmd.Stdout = os.Stdout
 	attachCmd.Stderr = os.Stderr
