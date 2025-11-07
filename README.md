@@ -27,8 +27,8 @@ A lightweight Go script for managing Minecraft server sessions inside **tmux** â
 
 1. Clone or download this repository:
    ```bash
-   git clone https://github.com/yourusername/mc-tmux-manager.git
-   cd mc-tmux-manager
+   git clone git@github.com:Eposs10/tmux-mc-server-starter.git
+   cd tmux-mc-server-starter
    ```
 
 2. Build the executable:
