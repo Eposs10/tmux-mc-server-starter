@@ -2,8 +2,6 @@
 
 A lightweight Go script for managing Minecraft server sessions inside **tmux** — automatically restarts the server when it stops, logs exit codes, and allows graceful shutdowns.
 
----
-
 ## Features
 
 - Automatically starts a Minecraft server in a **tmux** session  
@@ -13,15 +11,11 @@ A lightweight Go script for managing Minecraft server sessions inside **tmux** �
 - Logs all exit codes to `exit_codes/server_exit_codes.log`  
 - Configurable RAM usage, wait time, and JAR file  
 
----
-
 ## Requirements
 
 - **Go 1.21+** (to build)
 - **tmux** installed
 - **Java** (for running the Minecraft server)
-
----
 
 ## Installation
 
@@ -41,13 +35,27 @@ A lightweight Go script for managing Minecraft server sessions inside **tmux** �
    sudo mv mc-tmux /usr/local/bin/
    ```
 
----
-
 ## Usage
 
 ### Basic Command
 ```bash
 mc-tmux <session_name> <path> [options]
+```
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|----------|-------------|
+| `--jar` | `string` | `server.jar` | The Minecraft server JAR file to run |
+| `--min-ram` | `string` | `2G` | Minimum RAM allocation |
+| `--max-ram` | `string` | `6G` | Maximum RAM allocation |
+| `--wait-time` | `int` | `5` | Seconds to wait before restarting |
+
+
+### Existing Session
+If a session with the same name already exists, the script will automatically attach to it instead of creating a new one:
+```
+⚠️ Session 'survival' already exists — attaching instead.
 ```
 
 ### Example
@@ -58,38 +66,13 @@ mc-tmux survival /home/minecraft/server --max-ram 8G --min-ram 4G --wait-time 10
 This starts a new tmux session named `survival`, running the server at `/home/minecraft/server` with 4–8 GB of RAM.  
 If the server crashes or stops, it will wait **10 seconds** before restarting — unless you press **Enter**.
 
----
 
-## Options
+## Attaching to an existing session
 
-| Option | Type | Default | Description |
-|--------|------|----------|-------------|
-| `--jar` | `string` | `server.jar` | The Minecraft server JAR file to run |
-| `--min-ram` | `string` | `2G` | Minimum RAM allocation |
-| `--max-ram` | `string` | `6G` | Maximum RAM allocation |
-| `--wait-time` | `int` | `5` | Seconds to wait before restarting |
-
----
-
-## Examples
-
-### Create and start a new session
+To attach to an existin session use the tmux command
 ```bash
-mc-tmux creative /home/mc/creative
+tmux a -t <session_name>
 ```
-
-### Specify a custom JAR file
-```bash
-mc-tmux modded /home/mc/modded --jar forge-1.20.1.jar
-```
-
-### Attach to an existing session
-If a session with the same name already exists, the script will automatically attach to it instead of creating a new one:
-```
-⚠️ Session 'survival' already exists — attaching instead.
-```
-
----
 
 ## Logs
 
@@ -100,8 +83,6 @@ exit_codes/server_exit_codes.log
 
 Each entry includes a timestamp and the exit code.
 
----
-
 ## Stopping the Server
 
 To stop the automatic restart loop:
@@ -111,3 +92,4 @@ To stop the automatic restart loop:
    ----- Press enter to prevent the server from restarting in 5 seconds -----
    ```
    Press **Enter** before the timer runs out.
+
